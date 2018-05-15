@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
 
-const hospitalSchema = new Schema({
+const doctorSchema = new Schema({
     name: {
         type: String,
         required: true
@@ -12,9 +12,14 @@ const hospitalSchema = new Schema({
         ref: 'User',
         required: true
     },
+    hospital: {
+        type: Schema.Types.ObjectId,
+        ref: 'Hospital',
+        required: true
+    },
     avatar: {
         type: String
     }
 });
 
-module.exports = mongoose.model('Hospital', hospitalSchema);
+module.exports = mongoose.model('Doctor', doctorSchema);
