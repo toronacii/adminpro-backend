@@ -2,9 +2,10 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 
-const appRoutes = require('./routes/app');
-const usersRoutes = require('./routes/users');
 const loginRoutes = require('./routes/login');
+const usersRoutes = require('./routes/users');
+const hospitalRoutes = require('./routes/hospital');
+const appRoutes = require('./routes/app');
 
 var app = express();
 
@@ -16,8 +17,9 @@ mongoose.connection.openUri("mongodb://localhost:27017/hospital-db", (err, res) 
     console.log("Database on port 27017: \x1b[32m%s\x1b[0m", "online");
 });
 
-app.use('/users', usersRoutes);
 app.use('/login', loginRoutes);
+app.use('/users', usersRoutes);
+app.use('/hospitals', hospitalRoutes);
 app.use('/', appRoutes);
 
 app.listen(3000, () => {
