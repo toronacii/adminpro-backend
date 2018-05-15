@@ -5,16 +5,32 @@ const authenticationMiddleware = require('../middlewares/authentication');
 
 const app = express();
 
-app.get('/', (req, res) => {
-    Doctor.find({}, (err, doctors) => {
-        if (err) {
-            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-                message: 'Error getting doctors',
-                errors: err
+app.get('/', ({ query }, res) => {
+
+    let limit = query.limit && Number(query.limit);
+    let offset = query.offset && Number(query.offset);
+
+    Doctor.find({})
+        .populate('user', 'name email')
+        .populate('hospital')
+        .limit(limit)
+        .skip(offset)
+        .exec((err, doctors) => {
+            if (err) {
+                return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                    message: 'Error getting doctors',
+                    errors: err
+                })
+            }
+            Doctor.count({}, (err, total) => {
+                return res.json({
+                    limit,
+                    offset,
+                    total,
+                    results: doctors
+                });
             })
-        }
-        return res.json(doctors);
-    })
+        })
 });
 
 app.post('/', authenticationMiddleware.verifyToken, ({ body, user }, res) => {

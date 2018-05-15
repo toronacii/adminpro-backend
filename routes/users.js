@@ -6,16 +6,30 @@ const authenticationMiddleware = require('../middlewares/authentication');
 
 const app = express();
 
-app.get('/', (req, res) => {
-    User.find({}, (err, users) => {
-        if (err) {
-            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-                message: 'Error gettings users',
-                errors: err
+app.get('/', ({ query }, res) => {
+
+    let limit = query.limit && Number(query.limit);
+    let offset = query.offset && Number(query.offset);
+
+    User.find({})
+        .limit(limit)
+        .skip(offset)
+        .exec((err, users) => {
+            if (err) {
+                return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                    message: 'Error gettings users',
+                    errors: err
+                })
+            }
+            User.count({}, (err, total) => {
+                return res.json({
+                    limit,
+                    offset,
+                    total,
+                    results: users
+                });
             })
-        }
-        return res.json(users);
-    })
+        })
 });
 
 app.post('/', authenticationMiddleware.verifyToken, ({ body }, res) => {
