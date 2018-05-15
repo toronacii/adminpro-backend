@@ -1,7 +1,10 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const HttpStatus = require('http-status-codes');
+
 const User = require('../models/user');
+const SEED = require('../config/constants').SEED;
 
 const app = express();
 
@@ -21,9 +24,12 @@ app.post('/', ({ body }, res) => {
                     errors: err
                 })
             }
-
             user.password = undefined;
-            return res.json(user);
+            let token = jwt.sign({ user}, SEED, { expiresIn: 14400 });
+            return res.json({
+                token,
+                user
+            });
         });
 });
 

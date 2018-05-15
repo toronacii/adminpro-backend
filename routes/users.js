@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const HttpStatus = require('http-status-codes');
 const User = require('../models/user');
+const authenticationMiddleware = require('../middlewares/authentication');
 
 const app = express();
 
@@ -17,7 +18,7 @@ app.get('/', (req, res) => {
     })
 });
 
-app.post('/', ({ body }, res) => {
+app.post('/', authenticationMiddleware.verifyToken, ({ body }, res) => {
 
     let user = new User({
         name: body.name,
@@ -40,7 +41,7 @@ app.post('/', ({ body }, res) => {
     })
 });
 
-app.put('/:id', ({ params, body }, res) => {
+app.put('/:id', authenticationMiddleware.verifyToken, ({ params, body }, res) => {
 
     User.findById(params.id, (err, user) => {
         if (err) {
@@ -81,7 +82,7 @@ app.put('/:id', ({ params, body }, res) => {
     })
 });
 
-app.delete('/:id', ({ params }, res) => {
+app.delete('/:id', authenticationMiddleware.verifyToken, ({ params }, res) => {
     User.findByIdAndRemove(params.id, (err, userDeleted, other) => {
         if (err) {
             return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
