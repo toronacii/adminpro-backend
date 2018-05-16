@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const HttpStatus = require('http-status-codes');
 
-const SEED = require('../config/constants').SEED;
+const { SEED } = require('../config/constants');
 
 module.exports.verifyToken = (req, res, next) => {
     let token = req.query.token;
