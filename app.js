@@ -6,6 +6,7 @@ const loginRoutes = require('./routes/login');
 const usersRoutes = require('./routes/users');
 const hospitalRoutes = require('./routes/hospital');
 const doctorRoutes = require('./routes/doctor');
+const searchRoutes = require('./routes/search');
 const appRoutes = require('./routes/app');
 
 var app = express();
@@ -22,6 +23,7 @@ app.use('/login', loginRoutes);
 app.use('/users', usersRoutes);
 app.use('/hospitals', hospitalRoutes);
 app.use('/doctors', doctorRoutes);
+app.use('/search', searchRoutes);
 app.use('/', appRoutes);
 
 app.listen(3000, () => {
