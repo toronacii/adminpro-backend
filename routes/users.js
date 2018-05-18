@@ -32,7 +32,7 @@ app.get('/', ({ query }, res) => {
         })
 });
 
-app.post('/', authenticationMiddleware.verifyToken, ({ body }, res) => {
+app.post('/', ({ body }, res) => {
 
     let user = new User({
         name: body.name,

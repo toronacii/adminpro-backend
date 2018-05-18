@@ -45,7 +45,7 @@ app.put('/:resource/:id', ({ files, params }, res) => {
     }
 
     let filename = `${ params.id }-${ new Date().getMilliseconds() }.${ extension }`;
-    let path = `./uploads/${ params.resource }s/${ filename }`;
+    let path = `uploads/${ params.resource }s/${ filename }`;
 
     file.mv(path, err => {
         if (err) {
@@ -83,7 +83,7 @@ function uploadByResource(resource, id, path, res) {
             })
         }
 
-        if (model.avatar && fs.existsSync(model.avatar)) {
+        if (model.avatar && fs.existsSync(__dirname + '/../' + model.avatar)) {
             fs.unlink(model.avatar);
         }
 
