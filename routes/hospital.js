@@ -11,7 +11,7 @@ app.get('/', ({ query }, res) => {
     let offset = query.offset && Number(query.offset);
 
     Hospital.find({})
-        .populate('user', 'name email')
+        .populate('user', 'name email avatar')
         .limit(limit)
         .skip(offset)
         .exec((err, hospitals) => {
@@ -30,6 +30,34 @@ app.get('/', ({ query }, res) => {
                     results: hospitals
                 });
             })
+        })
+});
+
+app.get('/:id', ({ params, query }, res) => {
+
+    let limit = query.limit && Number(query.limit);
+    let offset = query.offset && Number(query.offset);
+
+    Hospital.findById(params.id)
+        .populate('user', 'name email avatar')
+        .limit(limit)
+        .skip(offset)
+        .exec((err, hospital) => {
+            if (err) {
+                return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                    message: `Error getting hospital with id ${ params.id }`,
+                    errors: err
+                })
+            }
+
+            if (!hospital) {
+                return res.status(HttpStatus.NOT_FOUND).json({
+                    message: `Hospital with id ${ params.id } does't exists!`,
+                    errors: err
+                })
+            }
+            
+            return res.json(hospital);
         })
 });
 

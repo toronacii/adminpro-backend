@@ -34,20 +34,23 @@ app.get('/general/:term', ({ params }, res) => {
         });
 });
 
-app.get('/:collection/:term', ({ params }, res) => {
+app.get('/:collection/:term', ({ query, params }, res) => {
+
+    let limit = query.limit && Number(query.limit);
+    let offset = query.offset && Number(query.offset);
 
     let regExp = new RegExp(params.term, 'i');
     let promise;
 
     switch (params.collection) {
         case 'users':
-            promise = searchUsers(regExp);
+            promise = searchPaginatedUsers(regExp, limit, offset);
         break;
         case 'hospitals':
-            promise = searchHospitals(regExp);
+            promise = searchPaginatedHospitals(regExp, limit, offset);
         break;
         case 'doctors':
-            promise = searchDoctors(regExp);
+            promise = searchPaginatedDoctors(regExp, limit, offset);
         break;
         default: return res.status(HttpStatus.NOT_FOUND).json({
             message: `cannot search by collection ${ params.collection }`,
@@ -75,11 +78,24 @@ function searchUsers(regExp) {
     }, 'users')
 }
 
+function searchPaginatedUsers(regExp, limit, offset) {
+    return searchPaginated(() => {
+        return User.find({}).or([ { name: regExp, email: regExp } ]) 
+    }, limit, offset, 'users');
+}
+
 function searchHospitals(regExp) {
     return search(() => {
         return Hospital.find({ name: regExp })
             .populate('user', 'name email role') 
     }, 'hospitals')
+}
+
+function searchPaginatedHospitals(regExp, limit, offset) {
+    return searchPaginated(() => {
+        return Hospital.find({ name: regExp })
+            .populate('user', 'name email role')
+    }, limit, offset, 'hospitals');
 }
 
 function searchDoctors(regExp) {
@@ -88,6 +104,14 @@ function searchDoctors(regExp) {
             .populate('hospital', 'name')
             .populate('user', 'name email role') 
     }, 'doctors')
+}
+
+function searchPaginatedDoctors(regExp, limit, offset) {
+    return searchPaginated(() => {
+        return Doctor.find({ name: regExp })
+            .populate('hospital', 'name')
+            .populate('user', 'name email role') 
+    }, limit, offset, 'doctors');
 }
 
 function search(modelQueryFn, collectionName) {
@@ -101,6 +125,32 @@ function search(modelQueryFn, collectionName) {
                     })
                 }
                 return resolve(collection)
+            })
+    });
+}
+
+function searchPaginated(modelQueryFn, limit, offset, collectionName) {
+    return new Promise((resolve, reject) => {
+        modelQueryFn()
+            .limit(limit)
+            .skip(offset)
+            .exec((err, collection) => {
+                if (err) {
+                    return reject({
+                        message: `Error getting ${ collectionName }`,
+                        errors: err
+                    })
+                }
+                modelQueryFn()
+                    .count({}, (err, total) => {
+                        if (err) return reject(err);
+                        return resolve({
+                            limit,
+                            offset,
+                            total,
+                            results: collection
+                        });
+                    })
             })
     });
 }
